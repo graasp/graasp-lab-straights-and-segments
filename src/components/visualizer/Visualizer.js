@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import React, { Component } from 'react';
 import { withTranslation } from 'react-i18next';
 import {
-  Line, Stage, Layer, Circle,
+  Line, Stage, Layer, Circle, Arrow,
 } from 'react-konva';
 import { AppState } from '../../config/AppState';
 
@@ -30,6 +30,7 @@ const initialState = {
     a: null,
     b: null,
   },
+  segmentLinePoint: null,
 };
 
 export class Visualizer extends Component {
@@ -56,7 +57,7 @@ export class Visualizer extends Component {
         startPoint: null,
         endPoint: null,
       },
-      lineDrawingFinished: true,
+      lineDrawingFinished: false,
       drawedLineEquation: {
         a: null,
         b: null,
@@ -165,6 +166,11 @@ export class Visualizer extends Component {
     this.setState({ drawedLineEquation: { a, b } });
   };
 
+  /**
+   *
+   * @param {Array} pointCoordinates
+   * @returns {Boolean} True or False whether the point is on the line or not
+   */
   isPointOnLine = (pointCoordinates) => {
     // y = ax + b
     const { drawedLineEquation } = this.state;
@@ -223,6 +229,7 @@ export class Visualizer extends Component {
           endPoint[1] + startPoint[1],
         ];
         this.getLineEquation(startPoint, newEndPoint);
+        this.linePoint();
       } else {
         this.setState({
           lineDrawingFinished: false,
@@ -279,7 +286,7 @@ export class Visualizer extends Component {
   };
 
   checkResults = () => {
-    const { simulation } = this.props;
+    const { simulation, t } = this.props;
     const { showLine, showSemiLine, showSegment } = simulation;
     const {
       drawedLinePoints,
@@ -296,7 +303,7 @@ export class Visualizer extends Component {
       /* const shouldTrace = showLine ?
        'une droite' : showSemiLine ? 'une demi-droite' : showSegment ? 'un segment' : ''; */
       swal({
-        title: 'ERREUR!',
+        title: t('Error!'),
         text: `Veuillez tracer ${shouldTrace}!`,
         icon: 'error',
         button: 'Super!',
@@ -318,8 +325,8 @@ export class Visualizer extends Component {
       ) {
         // alert("FAUX: Ceci n'est pas une droite!");
         swal({
-          title: 'FAUX!',
-          text: "Ceci n'est pas une droite!",
+          title: t('Wrong!'),
+          text: t('This is not a line'),
           icon: 'error',
           button: 'Ok!',
         });
@@ -339,8 +346,8 @@ export class Visualizer extends Component {
       ) {
         // alert("FAUX: Ceci n'est pas une droite!");
         swal({
-          title: 'FAUX!',
-          text: "Ceci n'est pas une droite!",
+          title: t('Wrong!'),
+          text: t('This is not a line'),
           icon: 'error',
           button: 'Ok!',
         });
@@ -353,7 +360,7 @@ export class Visualizer extends Component {
         && !this.isPointOnLine(circle3Coordinates)
       ) {
         // alert("Veuillez utilisez les points prevues sur le plan!");
-        swal('Erreur!', 'Veuillez utilisez les points prevues sur le plan!', 'error');
+        swal(t('Error!'), t('Please use the points provided on the map!'), 'error');
         return;
       }
 
@@ -367,14 +374,14 @@ export class Visualizer extends Component {
       ) {
         // alert("BRAVO: Vous venez de tracer une droite!");
         swal({
-          title: 'BRAVO!',
-          text: 'Vous venez de tracer une droite!',
+          title: t('Well done!'),
+          text: t('You have just drawn a line!'),
           icon: 'success',
           button: 'Super!',
         });
       } else {
         // alert("Veuillez utiliser deux points du plan!");
-        swal('Erreur!', 'Veuillez utiliser deux points du plan!', 'error');
+        swal(t('Error!'), t('Please use two points on the map!'), 'error');
       }
     } else if (showSemiLine) {
       // Handling result check for semi-line
@@ -394,8 +401,8 @@ export class Visualizer extends Component {
       ) {
         // alert("FAUX: Ceci n'est pas une demi-droite!");
         swal({
-          title: 'FAUX!',
-          text: "Ceci n'est pas une demi-droite!",
+          title: t('Wrong!'),
+          text: t('This is not a semi-line!'),
           icon: 'error',
           button: 'Ok!',
         });
@@ -415,8 +422,8 @@ export class Visualizer extends Component {
       ) {
         // alert("BRAVO: Vous venez de tracer une demi-droite!");
         swal({
-          title: 'BRAVO!',
-          text: 'Vous venez de tracer une demi-droite!',
+          title: t('Well done!'),
+          text: t('You have just drawn a semi-line!'),
           icon: 'success',
           button: 'Super!',
         });
@@ -433,16 +440,16 @@ export class Visualizer extends Component {
       ) {
         // alert("BRAVO: Vous venez de tracer une demi-droite!");
         swal({
-          title: 'BRAVO!!',
-          text: 'Vous venez de tracer une demi-droite!',
+          title: 'Well done!',
+          text: t('You have just drawn a semi-line!'),
           icon: 'success',
           button: 'Super!',
         });
       } else {
         // alert("FAUX: Ceci n'est pas une demi-droite!");
         swal({
-          title: 'FAUX!',
-          text: "Ceci n'est pas une demi-droite!",
+          title: t('Wrong!'),
+          text: t('This is not a semi-line!'),
           icon: 'error',
           button: 'Ok!',
         });
@@ -465,16 +472,16 @@ export class Visualizer extends Component {
       ) {
         // alert("BRAVO: Vous avez tracer un segment!");
         swal({
-          title: 'BRAVO!',
-          text: 'Vous venez de tracer un segment!',
+          title: 'Well done!',
+          text: t('You have just drawn a segment!'),
           icon: 'success',
           button: 'Super!',
         });
       } else {
         // alert("FAUX: Ceci n'est pas un segment!");
         swal({
-          title: 'FAUX!',
-          text: "Ceci n'est pas un segment!",
+          title: t('Wrong!'),
+          text: t('This is not a segment!'),
           icon: 'error',
           button: 'Ok!',
         });
@@ -484,6 +491,31 @@ export class Visualizer extends Component {
 
   reset = () => {
     this.setState({ ...initialState });
+  }
+
+  linePoint = () => {
+    const { drawedLinePoints: { startPoint, endPoint } } = this.state;
+    const ptStart = { x: 0, y: 0 };
+    const ptEnd = { x: endPoint[0], y: endPoint[1] };
+
+    const sz = {
+      width: Math.abs(ptEnd.x - ptStart.x),
+      height: Math.abs(ptEnd.y - ptStart.y),
+    };
+
+    const adj = {
+      width: sz.width * 0.2,
+      height: sz.height * 0.2,
+    };
+
+    // Compute new position of arrow.
+    const drawX = (startPoint[0] > startPoint[0] + endPoint[0])
+      ? (startPoint[0] + adj.width) : (startPoint[0] - adj.width);
+
+    const drawY = (startPoint[1] > endPoint[1])
+      ? startPoint[1] + adj.height : startPoint[1] - adj.height;
+
+    this.setState({ segmentLinePoint: [drawX, drawY] });
   }
 
   render() {
@@ -496,23 +528,24 @@ export class Visualizer extends Component {
       circle0Coordinates,
       circleCoordinates,
       circle3Coordinates,
+      lineDrawingFinished,
       drawedLinePoints: { startPoint, endPoint },
+      segmentLinePoint,
     } = this.state;
     const scale = Math.min(
       window.innerWidth / CANVAS_VIRTUAL_WIDTH,
       window.innerHeight / CANVAS_VIRTUAL_HEIGHT,
     );
+    // console.log(segmentLinePoint);
     return (
       <div className="visualizer-container">
         <div>
           <div className="mb-2">
-            Veuillez tracer
-            { traceCondition(showLine, 'une droite', '')
-             || traceCondition(showSemiLine, 'une demi-droite', '')
-             || traceCondition(showSegment, 'un segment', '')
+            {t('Please draw ')}
+            { t(traceCondition(showLine, 'a line', ''))
+             || t(traceCondition(showSemiLine, 'a semi-line', ''))
+             || t(traceCondition(showSegment, 'a segment', ''))
             }
-            { /* showLine ?
-            'une droite' : showSemiLine ? 'une demi-droite' : showSegment ? 'un segment' : '' */}
             <span>
               <Button
                 className="ml-2"
@@ -521,7 +554,7 @@ export class Visualizer extends Component {
                 color="success"
                 onClick={this.checkResults}
               >
-                {t('Verifier')}
+                {t('Check')}
               </Button>
             </span>
             <span>
@@ -532,7 +565,7 @@ export class Visualizer extends Component {
                 color="danger"
                 onClick={this.reset}
               >
-                {t('Reprendre')}
+                {t('Restart')}
               </Button>
             </span>
           </div>
@@ -560,7 +593,21 @@ export class Visualizer extends Component {
                 themeColor={themeColor}
                 t={t}
               />
-              {/* !!!!!!!!!!!!!!!!!!!! HERE WILL BE PLACED THE LINES !!!!!!!!!!!!!!!!!!! */}
+
+              {/* !!!!!!!! TRACE A LINE ALONG WITH THE LINE SEGMENT  !!!!!!!! */}
+              {segmentLinePoint && showSegment && startPoint && endPoint && lineDrawingFinished && (
+              <Arrow
+                pointerAtBeginning
+                scaleX={1.4}
+                scaleY={1.4}
+                stroke="rgb(0, 61, 55)"
+                x={segmentLinePoint[0]}
+                y={segmentLinePoint[1]}
+                points={[0, 0, ...endPoint]}
+              />
+              )}
+              {/* !!!!!!!! TRACE A LINE ALONG WITH THE LINE SEGMENT !!!!!!!! */}
+
               {startPoint && (
                 <>
                   <Circle
@@ -569,12 +616,23 @@ export class Visualizer extends Component {
                     y={startPoint[1]}
                     radius={0} // This is a hack, to set the endPoint position x, y
                   />
-                  <Line
-                    stroke="rgb(0, 150, 136)"
-                    x={startPoint[0]}
-                    y={startPoint[1]}
-                    points={[0, 0, ...endPoint]}
-                  />
+                  {showSegment ? (
+                    <Line
+                      pointerAtBeginning={showLine}
+                      stroke="rgb(0, 150, 136)"
+                      x={startPoint[0]}
+                      y={startPoint[1]}
+                      points={[0, 0, ...endPoint]}
+                    />
+                  ) : (
+                    <Arrow
+                      pointerAtBeginning={showLine}
+                      stroke="rgb(0, 150, 136)"
+                      x={startPoint[0]}
+                      y={startPoint[1]}
+                      points={[0, 0, ...endPoint]}
+                    />
+                  )}
                 </>
               )}
             </Layer>
